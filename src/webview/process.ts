@@ -32,7 +32,7 @@ export function quantizeColors(pixels: number[][], size: number, maxColors: numb
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const c = pixels[y][x];
-      const [, , , a] = unpack(c);
+      const [a] = unpack(c);
       if (a < 16) continue;
       hist.set(c, (hist.get(c) || 0) + 1);
     }
@@ -47,7 +47,7 @@ export function quantizeColors(pixels: number[][], size: number, maxColors: numb
     const row: number[] = [];
     for (let x = 0; x < size; x++) {
       const c = pixels[y][x];
-      const [, , , a] = unpack(c);
+      const [a] = unpack(c);
       if (a < 16) { row.push(TRANSPARENT); continue; }
       let best = reps[0];
       let bestD = Infinity;
@@ -132,18 +132,24 @@ export function traceShapes(quantized: number[][], size: number, tolerance: numb
   }
   const shapes: VectorShape[] = [];
   for (const [color, mask] of colors) {
-    // 连通分量：对每个未访问前景点做一次追踪（简化：单 mask 取首个轮廓）
     const visited = Array.from({ length: size }, () => new Array<boolean>(size).fill(false));
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
         if (!mask[y][x] || visited[y][x]) continue;
+        // 洪水填充标记整个连通分量，避免对同色 mask 重复追踪
+        const stack: [number, number][] = [[y, x]];
+        while (stack.length) {
+          const [cy, cx] = stack.pop()!;
+          if (cy < 0 || cx < 0 || cy >= size || cx >= size) continue;
+          if (!mask[cy][cx] || visited[cy][cx]) continue;
+          visited[cy][cx] = true;
+          stack.push([cy + 1, cx], [cy - 1, cx], [cy, cx + 1], [cy, cx - 1]);
+        }
         const contour = mooreTrace(mask, size, size);
         if (contour) {
           const simp = douglasPeucker(contour, Math.max(0.5, tolerance * size));
           shapes.push({ color, polygons: [simp] });
         }
-        // 标记该分量已处理（简化：仅追踪首个轮廓，避免重复；多连通体后续可扩展）
-        visited[y][x] = true;
       }
     }
   }
