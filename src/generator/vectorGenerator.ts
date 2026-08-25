@@ -1,4 +1,4 @@
-import { VectorInput, VectorShape } from './types';
+import { VectorInput } from './types';
 import { buildHeader } from './javaTemplate';
 
 function rgba(code: number): [number, number, number, number] {

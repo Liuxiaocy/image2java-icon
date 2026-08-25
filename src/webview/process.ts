@@ -17,9 +17,6 @@ export function samplePixels(data: Uint8ClampedArray, size: number): number[][] 
   return px;
 }
 
-function pack(a: number, r: number, g: number, b: number): number {
-  return (((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff)) >>> 0;
-}
 function unpack(c: number): [number, number, number, number] {
   return [(c >>> 24) & 0xff, (c >>> 16) & 0xff, (c >>> 8) & 0xff, c & 0xff];
 }
