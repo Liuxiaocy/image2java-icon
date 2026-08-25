@@ -14,8 +14,9 @@ describe('vectorGenerator', () => {
     assert.ok(code.includes('Graphics2D g2 = (Graphics2D) g.create();'), 'Graphics2D cast');
     assert.ok(code.includes('Path2D path = new Path2D.Double();'), 'Path2D');
     assert.ok(code.includes('g2.fill(path);'), 'fill');
-    assert.ok(code.includes('new Color(255, 0, 0, 255)'), 'red rgba');
-    assert.ok(code.includes('path.moveTo(x + 0, y + 0)'), 'first point');
+    assert.ok(code.includes('new Color(rgba[0], rgba[1], rgba[2], rgba[3])'), 'Color from rgba array');
+    assert.ok(code.includes('{255, 0, 0, 255}'), 'red color row');
+    assert.ok(code.includes('path.moveTo(x + poly[0][0], y + poly[0][1])'), 'first point');
   });
 
   it('handles multiple shapes', () => {
@@ -25,7 +26,8 @@ describe('vectorGenerator', () => {
     ];
     const code = generateVectorIcon({ size: 8, shapes });
     assert.ok(code.includes('public class GeneratedIcon implements Icon'));
-    const count = (code.match(/g2.fill\(path\);/g) || []).length;
-    assert.strictEqual(count, 2, 'one fill per shape');
+    assert.ok(code.includes('g2.fill(path);'), 'fill present (loop)');
+    assert.ok(code.includes('{0, 0, 0, 255}'), 'black rgba');
+    assert.ok(code.includes('{255, 255, 255, 255}'), 'white rgba');
   });
 });

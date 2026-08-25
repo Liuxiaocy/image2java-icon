@@ -3,7 +3,7 @@ import { buildHeader } from './javaTemplate';
 
 function rgba(code: number): [number, number, number, number] {
   const c = code >>> 0;
-  return [(c >>> 24) & 0xff, (c >>> 16) & 0xff, (c >>> 8) & 0xff, c & 0xff];
+  return [(c >>> 16) & 0xff, (c >>> 8) & 0xff, c & 0xff, (c >>> 24) & 0xff];
 }
 
 function polygonLiteral(poly: number[][]): string {
